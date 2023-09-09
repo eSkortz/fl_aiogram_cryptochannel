@@ -72,8 +72,7 @@ def get_balance_by_telegram_id(telegram_id: int) -> float:
     return result
 
 
-def create_new_transaction(hash: str, amount: float, from_user_id: int, status: str) -> None:
-    date = datetime.datetime.now()
+def create_new_transaction(hash: str, from_user_id: int, amount: float = None, status: bool = None, date = None) -> None:
     database = SessionLocal()
     new_transaction = Transactions(transaction_hash = hash,
                                    transaction_amount = amount,
@@ -93,6 +92,7 @@ def get_last_subscribtion_dateover_by_user_id(user_id: int) -> datetime:
             .order_by(Subcriptions.date_over.desc()) \
             .limit(1)
     result = database.execute(query).fetchone()
+    database.close()
     if result:
         return result[0]
     return datetime.datetime.now()
@@ -102,6 +102,7 @@ def check_user_for_trial_subscribtion_by_user_id(user_id: int) -> bool:
     database = SessionLocal()
     query = select(Subcriptions).where((Subcriptions.user_id == user_id) & (Subcriptions.sub_type == 'TRIAL'))
     result = database.execute(query).fetchone()
+    database.close()
     if result:
         return True
     return False
@@ -114,6 +115,7 @@ def check_user_have_active_subcribtion(user_id: int) -> bool:
             .order_by(Subcriptions.date_over.desc()) \
             .limit(1)
     result = database.execute(query).fetchone()
+    database.close()
     if result:
         if result[0] > datetime.datetime.now():
             return True
@@ -124,6 +126,7 @@ def check_user_have_enough_money(user_id: int, amount: float) -> bool:
     database = SessionLocal()
     query = select(Users.balance).where(Users.telegram_id == user_id)
     result = database.execute(query).fetchone()[0]
+    database.close()
     if result > amount:
         return True
     return False
@@ -154,6 +157,7 @@ def get_five_tickets_by_user_id(user_id: int) -> tuple:
             .where(Tickets.user_id == user_id)\
             .order_by(Tickets.id.desc()).limit(5)
     result = database.execute(query).fetchall()
+    database.close()
     return result
 
 
@@ -163,5 +167,25 @@ def get_ticket_by_id(ticket_id: int) -> tuple:
                    Tickets.answer, Tickets.date_close)\
             .where(Tickets.id == ticket_id).limit(1)
     result = database.execute(query).fetchone()
+    database.close()
     return result
+
+
+def update_transaction_by_hash(hash: str, amount: float, date) -> None:
+    database = SessionLocal()
+    query = update(Transactions).where(Transactions.transaction_hash == hash).values(transaction_amount=amount, status=True, date_close=date)
+    database.execute(query)
+    database.commit()
+    database.close()
     
+    
+def update_user_balance_by_user_id(user_id: int, amount: float) -> None:
+    database = SessionLocal()
+    query = select(Users.balance).where(Users.telegram_id == user_id)
+    result = database.execute(query).fetchone()[0]
+    new_balance = result + amount
+    print(new_balance)
+    query = update(Users).where(Users.telegram_id == user_id).values(balance=new_balance)
+    database.execute(query)
+    database.commit()
+    database.close()

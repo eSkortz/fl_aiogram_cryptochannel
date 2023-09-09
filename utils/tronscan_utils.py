@@ -7,7 +7,6 @@ from utils import database_utils
 def check_transaction_by_hash(hash: str) -> tuple:
     response = requests.get(f'https://apilist.tronscanapi.com/api/transaction-info?hash={hash}')
     result = json.loads(response.text)
-    print(result)
     
     try:
         status = result['contractRet']
@@ -19,6 +18,8 @@ def check_transaction_by_hash(hash: str) -> tuple:
     
     valid_adress = bot_config.USDT_WALLET
     is_in_base = database_utils.check_transactions_by_hash(hash=hash)
+    
+    # print(status, confirm_status, adress, is_in_base)
     
     if adress == valid_adress and status == 'SUCCESS' and confirm_status == True and is_in_base == False:
         return True, amount
