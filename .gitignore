@@ -1,0 +1,7 @@
+__pycache__/
+.vscode/
+env/
+src/
+.bot_config
+.database_config
+tgmessage_shema.xml
