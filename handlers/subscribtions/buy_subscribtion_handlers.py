@@ -134,7 +134,6 @@ async def callback_buying_subcribtion(callback: CallbackQuery) -> Coroutine:
         Coroutine: на выходе несколько корутин
     """
     sub_title = callback.data.split('|')[1]
-    print(sub_title)
     is_have_active_subscribtion = database_utils.Check\
         .check_user_have_active_subcribtion(user_id=callback.message.chat.id)
     if is_have_active_subscribtion:
@@ -149,7 +148,6 @@ async def callback_buying_subcribtion(callback: CallbackQuery) -> Coroutine:
                                      user_name=callback.message.chat.username,
                                      sub_type=sub_title)
     amount = database_utils.Get.get_subscribtion_price_by_title(title=f'{sub_title}')
-    print(amount)
     database_utils.Update.update_user_balance_by_user_id(user_id=callback.message.chat.id, amount=(-1*amount))
     markup_inline = only_to_main.get()
     await callback.message.delete()
