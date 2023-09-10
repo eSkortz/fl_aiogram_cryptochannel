@@ -1,28 +1,41 @@
-from aiogram import Router, F
+from aiogram import Bot, Router, F
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram import Bot
 
-from typing import Coroutine, Optional
+from typing import Coroutine
 
+# * импортируем конфиг бота
 from config.config_reader import bot_config
+# * импортируем разметку
 from keyboards.admin import only_to_admin
+# * импортируем ручки к бд
 from utils import database_utils
 
-
+# * объявляем бота и роутер
 bot = Bot(token=bot_config.TOKEN.get_secret_value())
-
 router = Router()
 
 
 class AddSubcribtion(StatesGroup):
+    """наследованный класс стейтов для проверки
+    ввода данных и хранения состояний
+    """
     waiting_for_username = State()
     waiting_for_days = State()
     
 
 @router.callback_query(F.data == "add_days")
 async def callback_add_days(callback: CallbackQuery, state: FSMContext) -> Coroutine:
+    """колбэк по кнопке добавления дней пользователю
+
+    Args:
+        callback (CallbackQuery): сам колбэк с сообщения
+        state (FSMContext): наследуем fsm
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     await callback.message.delete()
     sent_message = await callback.message\
         .answer('✏️ Введите ник пользователя и отправьте его в чат')
@@ -32,6 +45,15 @@ async def callback_add_days(callback: CallbackQuery, state: FSMContext) -> Corou
 
 @router.message(AddSubcribtion.waiting_for_username)
 async def fsm_adddays_processing_first(message: Message, state: FSMContext) -> Coroutine:
+    """отработка состояния на ввод юзернейма
+
+    Args:
+        message (Message): сообщение пользователя
+        state (FSMContext): наследуем fsm
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     is_user_with_username_exist = database_utils.Check.check_user_by_username(username=message.text)
     await message.delete()
     state_data = await state.get_data()
@@ -48,6 +70,15 @@ async def fsm_adddays_processing_first(message: Message, state: FSMContext) -> C
 
 @router.message(AddSubcribtion.waiting_for_days)
 async def fsm_adddays_processing_second(message: Message, state: FSMContext) -> Coroutine:
+    """отработка состояние на ввод количества дней
+
+    Args:
+        message (Message): сообщение пользователя
+        state (FSMContext): наследуем fsm
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     try:
         int(message.text)
     except Exception:

@@ -1,18 +1,18 @@
-from aiogram import Router, F
+from aiogram import Bot, Router, F
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram import Bot
-
 from typing import Coroutine
 
+# * Импортируем конфиг бота
 from config.config_reader import bot_config
+# * Импортируем ручки под бд
 from utils import database_utils
-
+# * Импортируем разметку
 from keyboards.admin import admin_tickets, admin_ticket_info, only_to_admin
 
+# * объявляем бота и роутер
 bot = Bot(token=bot_config.TOKEN.get_secret_value())
-
 router = Router()
 
 class Ticket(StatesGroup):
@@ -21,6 +21,14 @@ class Ticket(StatesGroup):
 
 @router.callback_query(F.data == "admin_tickets")
 async def callback_admin_tickets(callback: CallbackQuery) -> Coroutine:
+    """отработка колбэка на список тикетов
+
+    Args:
+        callback (CallbackQuery): сам колюэк с сообщением
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     markup_inline = admin_tickets.get()
     await callback.message.delete()
     await callback.message.answer('🗂 Это раздел админ тикеты', 
@@ -29,6 +37,15 @@ async def callback_admin_tickets(callback: CallbackQuery) -> Coroutine:
     
 @router.callback_query(F.data.startswith('admin_ticket_info'))
 async def callback_admin_ticket_info(callback: CallbackQuery) -> Coroutine:
+    """отработка колбэка под раздел информации по тикету
+    в админ-панели
+
+    Args:
+        callback (CallbackQuery): сам колбэк
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     ticket_id = callback.data.split('|')[1]
     ticket_tuple = database_utils.Get.get_ticket_by_id(ticket_id=ticket_id)
     
@@ -45,6 +62,15 @@ async def callback_admin_ticket_info(callback: CallbackQuery) -> Coroutine:
     
 @router.callback_query(F.data.startswith('answer_for_ticket'))
 async def callback_answer_for_ticket(callback: CallbackQuery, state: FSMContext) -> Coroutine:
+    """отработка колюбэка под ответ на тикет
+
+    Args:
+        callback (CallbackQuery): сам колбэк
+        state (FSMContext): наследуем fsm
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     ticket_id = callback.data.split('|')[1]
     sent_message = await callback.message.answer('✏️ Введите ответ и отправьте его в чат')
     await state.set_state(Ticket.waiting_for_response)
@@ -55,6 +81,15 @@ async def callback_answer_for_ticket(callback: CallbackQuery, state: FSMContext)
 
 @router.message(Ticket.waiting_for_response)
 async def fsm_answer_for_ticket(message: Message, state: FSMContext) -> Coroutine:
+    """отработка состояние на воод ответа на тикет
+
+    Args:
+        message (Message): сообщение пользователя
+        state (FSMContext): наследуем fsm
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     state_data = await state.get_data()
     ticket_id = state_data['ticket_id']
     database_utils.Update.update_answer_for_ticket_by_id(ticket_id=ticket_id, answer=message.text)
