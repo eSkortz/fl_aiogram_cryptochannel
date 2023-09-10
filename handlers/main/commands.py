@@ -28,6 +28,6 @@ async def recipient_command(message: Message) -> Coroutine:
     await message.reply(f"{message.chat.id}")
     
 
-@router.message(Command("__get_chat_info__"))
+@router.message(Command("get_chat_info"))
 async def get_chat_info(message: Message) -> Coroutine:
     await message.reply(f'{message}')
