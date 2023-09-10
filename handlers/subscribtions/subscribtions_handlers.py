@@ -12,7 +12,7 @@ router = Router()
 @router.callback_query(F.data == 'subscribtion_trial')
 async def subscribtion_trial(callback: CallbackQuery) -> Coroutine:
     markup_inline = trial.get()
-    photo = FSInputFile('src/trial.png')
+    photo = FSInputFile('src/trial.jpg')
     days = database_utils.Get.get_subscribtion_days_by_title(title='TRIAL')
     await callback.message.delete()
     await callback.message.answer_photo(photo=photo, 

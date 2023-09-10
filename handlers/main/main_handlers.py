@@ -44,8 +44,10 @@ async def my_wallet_callback(callback: CallbackQuery) -> Coroutine:
 @router.callback_query(F.data == "subscribtions")
 async def subscriptions_callback(callback: CallbackQuery) -> Coroutine:
     markup_inline = subscribtions.get()
+    photo = FSInputFile("src/start.jpg")
     await callback.message.delete()
-    await callback.message.answer(text='🛒 Доступные варианты подписки, период действия подписок ' \
+    await callback.message.answer_photo(photo=photo, 
+                                        caption='🛒 Доступные варианты подписки, период действия подписок ' \
                                         'не суммируется, пробная подписка доступна для активациии только 1 раз', 
                                         reply_markup=markup_inline)
 
@@ -73,9 +75,11 @@ async def my_subscription_callback(callback: CallbackQuery) -> Coroutine:
 @router.callback_query(F.data == "faq")
 async def faq_callback(callback: CallbackQuery) -> Coroutine:
     markup_inline = faq.get()
+    photo = FSInputFile("src/faq.jpg")
     await callback.message.delete()
-    await callback.message.answer(reply_markup=markup_inline, 
-                                        text='💭 Это раздел помощи, здесь вы ' \
+    await callback.message.answer_photo(photo=photo,
+                                        reply_markup=markup_inline, 
+                                        caption='💭 Это раздел помощи, здесь вы ' \
                                         'можете создать тикет и задать свой вопрос, ' \
                                         'мы ответим вам в ближайшее время')
 

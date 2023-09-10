@@ -4,6 +4,8 @@ from aiogram import Bot, Dispatcher
 
 from typing import Coroutine
 
+from chat_scripts import auto_kicking_user, auto_notify_user
+
 # * Импортируем значения из конфига
 from config.config_reader import bot_config
 
@@ -48,7 +50,9 @@ async def main() -> Coroutine:
     await bot.delete_webhook(drop_pending_updates=True)
     
     # * Запускаем поллинг бота
-    await dp.start_polling(bot)
+    await asyncio.create_task(dp.start_polling(bot))
+    #await asyncio.create_task(auto_notify_user())
+    #await asyncio.create_task(auto_kicking_user())
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery, Message
 
 from typing import Coroutine
@@ -6,7 +6,10 @@ from typing import Coroutine
 from keyboards.main import only_to_main
 from keyboards.subscribtions import buying_subcribtion
 from utils import database_utils
+from config.config_reader import bot_config
 
+
+bot = Bot(token=bot_config.TOKEN.get_secret_value())
 router = Router()
 
 
@@ -85,5 +88,7 @@ async def callback_buying_subcribtion(callback: CallbackQuery) -> Coroutine:
                                      sub_type=sub_title)
     markup_inline = only_to_main.get()
     await callback.message.delete()
-    await callback.message.answer('✅ Вы успешно приобрели подписку',
+    invite = await bot.create_chat_invite_link(chat_id=-1001975523437, member_limit=1)
+    await callback.message.answer('✅ Вы успешно приобрели подписку\n\n'\
+                                  f'Ссылка для вступления 👇:\n\n {invite.invite_link}',
                                   reply_markup=markup_inline)

@@ -1,11 +1,11 @@
-from aiogram import Router, types
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import FSInputFile, Message
+from typing import Coroutine
 
 from keyboards.main import start
 from utils import database_utils
-
-from typing import Coroutine
+from config.config_reader import bot_config
 
 router = Router()
 
@@ -28,6 +28,6 @@ async def recipient_command(message: Message) -> Coroutine:
     await message.reply(f"{message.chat.id}")
     
 
-@router.message(Command("get_chat_info"))
-async def get_chat_info(message: Message) -> Coroutine:
-    await message.reply(f'{message}')
+# @router.message(Command("get_chat_info"))
+# async def get_chat_info(message: Message) -> Coroutine:
+#     await message.reply(f'{message}')
