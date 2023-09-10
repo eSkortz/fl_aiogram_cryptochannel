@@ -1,8 +1,8 @@
 from aiogram import Router, types
 from aiogram.filters import Command
-from aiogram.types import FSInputFile
+from aiogram.types import FSInputFile, Message
 
-from keyboards import start
+from keyboards.main import start
 from utils import database_utils
 
 from typing import Coroutine
@@ -10,8 +10,8 @@ from typing import Coroutine
 router = Router()
 
 @router.message(Command("start"))
-async def start_command(message: types.Message) -> Coroutine:
-    is_register = database_utils.check_user_by_telegram_id(telegram_id=message.chat.id)
+async def start_command(message: Message) -> Coroutine:
+    is_register = database_utils.Check.check_user_by_telegram_id(telegram_id=message.chat.id)
     if not is_register:
         database_utils.create_new_user(telegram_id=message.chat.id, username=message.chat.username)
     photo = FSInputFile("src/start.jpg")
@@ -24,5 +24,10 @@ async def start_command(message: types.Message) -> Coroutine:
                                 reply_markup=markup_inline)
 
 @router.message(Command("recipient"))
-async def recipient_command(message: types.Message) -> Coroutine:
+async def recipient_command(message: Message) -> Coroutine:
     await message.reply(f"{message.chat.id}")
+    
+
+@router.message(Command("__get_chat_info__"))
+async def get_chat_info(message: Message) -> Coroutine:
+    await message.reply(f'{message}')

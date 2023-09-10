@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, Column, Integer, String, BigInteger, DateTime, Float, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
-from config_reader import database_config
-from config_reader import bot_config
+from config.config_reader import database_config
+from config.config_reader import bot_config
 
 import datetime
 

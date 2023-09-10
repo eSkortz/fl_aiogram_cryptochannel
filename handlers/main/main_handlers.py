@@ -5,8 +5,14 @@ from aiogram.types import FSInputFile
 from typing import Coroutine
 import datetime
 
+from keyboards.admin import admin
+from keyboards.faq import faq
+from keyboards.my_subscribtion import my_subscribtion
+from keyboards.subscribtions import subscribtions
+from keyboards.wallet import my_wallet
+from keyboards.main import start
+
 from utils import database_utils
-from keyboards import my_subscribtion, my_wallet, start, subscribtions, faq, admin
 
 router = Router()
 
@@ -27,7 +33,7 @@ async def main_menu(callback: CallbackQuery) -> Coroutine:
 @router.callback_query(F.data == "my_wallet")
 async def my_wallet_callback(callback: CallbackQuery) -> Coroutine:
     markup_inline = my_wallet.get()
-    balance = database_utils.get_balance_by_telegram_id(telegram_id=callback.message.chat.id)
+    balance = database_utils.Get.get_balance_by_telegram_id(telegram_id=callback.message.chat.id)
     username = callback.message.chat.username
     await callback.message.delete()
     await callback.message.answer(f'🪪 {username}\n\n' \
@@ -38,18 +44,16 @@ async def my_wallet_callback(callback: CallbackQuery) -> Coroutine:
 @router.callback_query(F.data == "subscribtions")
 async def subscriptions_callback(callback: CallbackQuery) -> Coroutine:
     markup_inline = subscribtions.get()
-    photo = FSInputFile("src/subscribtion.png")
     await callback.message.delete()
-    await callback.message.answer_photo(photo=photo,
-                                        caption='🛒 Доступные варианты подписки, период действия подписок ' \
-                                        'может суммироваться, пробная подписка доступна для активациии только 1 раз', 
+    await callback.message.answer(text='🛒 Доступные варианты подписки, период действия подписок ' \
+                                        'не суммируется, пробная подписка доступна для активациии только 1 раз', 
                                         reply_markup=markup_inline)
 
 
 @router.callback_query(F.data == "my_subscribtions")
 async def my_subscription_callback(callback: CallbackQuery) -> Coroutine:
     markup_inline = my_subscribtion.get()
-    date_over = database_utils.get_last_subscribtion_dateover_by_user_id(user_id=callback.message.chat.id)
+    date_over = database_utils.Get.get_last_subscribtion_dateover_by_user_id(user_id=callback.message.chat.id)
     if date_over > datetime.datetime.now():
         status = '✅ Active'
         timedifference = (date_over - datetime.datetime.now()).total_seconds()
@@ -69,10 +73,9 @@ async def my_subscription_callback(callback: CallbackQuery) -> Coroutine:
 @router.callback_query(F.data == "faq")
 async def faq_callback(callback: CallbackQuery) -> Coroutine:
     markup_inline = faq.get()
-    photo = FSInputFile("src/faq.png")
     await callback.message.delete()
-    await callback.message.answer_photo(photo=photo, reply_markup=markup_inline, 
-                                        caption='💭 Это раздел помощи, здесь вы ' \
+    await callback.message.answer(reply_markup=markup_inline, 
+                                        text='💭 Это раздел помощи, здесь вы ' \
                                         'можете создать тикет и задать свой вопрос, ' \
                                         'мы ответим вам в ближайшее время')
 

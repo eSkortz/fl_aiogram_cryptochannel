@@ -5,7 +5,7 @@ from aiogram import types
 def get(sub_type) -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(types.InlineKeyboardButton(
-        text='✅ Да', callback_data=f'buying_{sub_type}'
+        text='✅ Да', callback_data=f'buying|{sub_type}'
     ), types.InlineKeyboardButton(
         text='❌ Нет', callback_data="subcribtions"
     ))

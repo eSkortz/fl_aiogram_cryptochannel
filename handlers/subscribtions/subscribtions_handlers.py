@@ -5,7 +5,7 @@ from typing import Coroutine
 from aiogram.types import FSInputFile
 
 from utils import database_utils
-from keyboards.into_subscribtions import trial, light, standard, premium
+from keyboards.subscribtions import trial, light, standard, premium
 
 router = Router()
 
@@ -13,7 +13,7 @@ router = Router()
 async def subscribtion_trial(callback: CallbackQuery) -> Coroutine:
     markup_inline = trial.get()
     photo = FSInputFile('src/trial.png')
-    days = database_utils.get_subscribtion_days_by_title(title='TRIAL')
+    days = database_utils.Get.get_subscribtion_days_by_title(title='TRIAL')
     await callback.message.delete()
     await callback.message.answer_photo(photo=photo, 
                                         caption=f'Это подписка 📙TRIAL, период ее действия {days} дней ' \
@@ -25,7 +25,7 @@ async def subscribtion_trial(callback: CallbackQuery) -> Coroutine:
 async def subscribtion_light(callback: CallbackQuery) -> Coroutine:
     markup_inline = light.get()
     photo = FSInputFile('src/light.jpg')
-    days = database_utils.get_subscribtion_days_by_title(title='LIGHT')
+    days = database_utils.Get.get_subscribtion_days_by_title(title='LIGHT')
     await callback.message.delete()
     await callback.message.answer_photo(photo=photo, 
                                         caption=f'Это подписка 📗LIGHT, период ее действия {days} дней ', 
@@ -36,7 +36,7 @@ async def subscribtion_light(callback: CallbackQuery) -> Coroutine:
 async def subscribtion_standard(callback: CallbackQuery) -> Coroutine:
     markup_inline = standard.get()
     photo = FSInputFile('src/standard.jpg')
-    days = database_utils.get_subscribtion_days_by_title(title='STANDARD')
+    days = database_utils.Get.get_subscribtion_days_by_title(title='STANDARD')
     await callback.message.delete()
     await callback.message.answer_photo(photo=photo, 
                                         caption=f'Это подписка 📕STANDARD, период ее действия {days} дней ', 
@@ -47,7 +47,7 @@ async def subscribtion_standard(callback: CallbackQuery) -> Coroutine:
 async def subscribtion_premium(callback: CallbackQuery) -> Coroutine:
     markup_inline = premium.get()
     photo = FSInputFile('src/premium.jpg')
-    days = database_utils.get_subscribtion_days_by_title(title='PREMIUM')
+    days = database_utils.Get.get_subscribtion_days_by_title(title='PREMIUM')
     await callback.message.delete()
     await callback.message.answer_photo(photo=photo, 
                                         caption=f'Это подписка 📘PREMIUM, период ее действия {days} дней ', 

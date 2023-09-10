@@ -6,14 +6,14 @@ class BotConfig(BaseSettings):
     USDT_WALLET: str
     
     class Config:
-        env_file = '.bot_config'
+        env_file = 'config/.bot_config'
         env_file_encoding = 'utf-8'
         
 class DatabaseConfig(BaseSettings):
     DATABASE_URL: SecretStr
     
     class Config:
-        env_file = '.database_config'
+        env_file = 'config/.database_config'
         env_file_encoding = 'utf-8'
 
 

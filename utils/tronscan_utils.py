@@ -1,7 +1,7 @@
 import requests
 import json
 
-from config_reader import bot_config
+from config.config_reader import bot_config
 from utils import database_utils
 
 def check_transaction_by_hash(hash: str) -> tuple:
@@ -17,7 +17,7 @@ def check_transaction_by_hash(hash: str) -> tuple:
         return False, 0.0
     
     valid_adress = bot_config.USDT_WALLET
-    is_in_base = database_utils.check_transactions_by_hash(hash=hash)
+    is_in_base = database_utils.Check.check_transactions_by_hash(hash=hash)
     
     # print(status, confirm_status, adress, is_in_base)
     

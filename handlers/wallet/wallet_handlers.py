@@ -5,11 +5,13 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram import Bot
 
 import datetime
-from typing import Coroutine, Optional
+from typing import Coroutine
 
+from config.config_reader import bot_config
 from utils import database_utils, tronscan_utils
-from config_reader import bot_config
-from keyboards import only_to_main, payment_keyboard
+
+from keyboards.wallet import payment_keyboard
+from keyboards.main import only_to_main
 
 bot = Bot(token=bot_config.TOKEN.get_secret_value())
 
@@ -34,8 +36,8 @@ async def payment_failure(message: Message) -> Coroutine:
 async def payment_processing(message: Message, hash: str) -> Coroutine:
     result, amount = tronscan_utils.check_transaction_by_hash(hash)
     if result:
-        database_utils.update_transaction_by_hash(hash=hash, amount=amount, date=datetime.datetime.now())
-        database_utils.update_user_balance_by_user_id(user_id=message.chat.id, amount=amount)
+        database_utils.Update.update_transaction_by_hash(hash=hash, amount=amount, date=datetime.datetime.now())
+        database_utils.Update.update_user_balance_by_user_id(user_id=message.chat.id, amount=amount)
         await payment_success(message=message)
     else:
         markup_inline = payment_keyboard.get(hash=hash)
@@ -51,8 +53,8 @@ async def callback_payment_processing(callback: CallbackQuery) -> Coroutine:
     hash = callback.data.split('|')[1]
     result, amount = tronscan_utils.check_transaction_by_hash(hash)
     if result:
-        database_utils.update_transaction_by_hash(hash=hash, amount=amount, date=datetime.datetime.now())
-        database_utils.update_user_balance_bu_user_id(user_id=callback.message.chat.id, amount=amount)
+        database_utils.Update.update_transaction_by_hash(hash=hash, amount=amount, date=datetime.datetime.now())
+        database_utils.Update.update_user_balance_bu_user_id(user_id=callback.message.chat.id, amount=amount)
         await payment_success(message=callback.message)
     else:
         markup_inline = payment_keyboard.get(hash=hash)
@@ -78,7 +80,7 @@ async def payment(callback: CallbackQuery, state: FSMContext) -> Coroutine:
 async def payment_wait(message: Message, state: FSMContext) -> Coroutine:
     hash = message.text
     await state.update_data(hash = hash)
-    is_exist_transaction = database_utils.check_transactions_by_hash(hash=hash)
+    is_exist_transaction = database_utils.Check.check_transactions_by_hash(hash=hash)
     
     state_data = await state.get_data()
     id_to_delete = state_data['id']
@@ -89,9 +91,9 @@ async def payment_wait(message: Message, state: FSMContext) -> Coroutine:
     if is_exist_transaction:
         await payment_failure(message)
     elif result:
-        database_utils.create_new_transaction(hash=hash, from_user_id=message.chat.id, amount=amount, status=True, date=datetime.datetime.now())
-        database_utils.update_user_balance_by_user_id(user_id=message.chat.id, amount=amount)
+        database_utils.Create.create_new_transaction(hash=hash, from_user_id=message.chat.id, amount=amount, status=True, date=datetime.datetime.now())
+        database_utils.Update.update_user_balance_by_user_id(user_id=message.chat.id, amount=amount)
         await payment_success(message=message)
     else:
-        database_utils.create_new_transaction(hash=hash, from_user_id=message.chat.id)
+        database_utils.Create.create_new_transaction(hash=hash, from_user_id=message.chat.id)
         await payment_processing(message=message, hash=hash)

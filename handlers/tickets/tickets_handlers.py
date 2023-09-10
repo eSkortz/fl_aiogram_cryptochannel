@@ -5,11 +5,12 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram import Bot
 
 from typing import Coroutine
-import datetime
 
+from config.config_reader import bot_config
 from utils import database_utils
-from keyboards import only_to_main, my_tickets, ticket_info
-from config_reader import bot_config
+
+from keyboards.faq import my_tickets, ticket_info
+from keyboards.main import only_to_main
 
 bot = Bot(token=bot_config.TOKEN.get_secret_value())
 
@@ -37,14 +38,14 @@ async def create_ticket(callback: CallbackQuery, state: FSMContext) -> Coroutine
     
 
 @router.message(Ticket.waiting_new_ticket)
-async def ticket_processing(message: Message, state: FSMContext) -> Coroutine:
-    database_utils.create_new_ticket(user_id=message.chat.id, username=message.chat.username, question=message.text)
+async def fsm_ticket_processing(message: Message, state: FSMContext) -> Coroutine:
+    database_utils.Create.create_new_ticket(user_id=message.chat.id, username=message.chat.username, question=message.text)
     state_data = await state.get_data()
     await answer_for_request(message=message, id_to_delete=state_data['id'])
 
 
 @router.callback_query(F.data == "my_tickets")
-async def my_tickets_callback(callback: CallbackQuery, state: FSMContext) -> Coroutine:
+async def my_tickets_callback(callback: CallbackQuery) -> Coroutine:
     markup_inline = my_tickets.get(user_id=callback.message.chat.id)
     await callback.message.delete()
     await callback.message.answer('🗂 Это раздел мои тикеты, здесь хранятся '\
@@ -56,15 +57,15 @@ async def my_tickets_callback(callback: CallbackQuery, state: FSMContext) -> Cor
 
 @router.callback_query(F.data.startswith('ticket_info'))
 async def ticket_info_callback(callback: CallbackQuery):
-    markup_inline = ticket_info.get()
     ticket_id = int(callback.data.split('|')[1])
-    ticket_tuple = database_utils.get_ticket_by_id(ticket_id=ticket_id)
+    ticket_tuple = database_utils.Get.get_ticket_by_id(ticket_id=ticket_id)
     
     ticket_question = ticket_tuple[0]
     ticket_open = str(ticket_tuple[1])[:10]
     ticket_answer = ticket_tuple[2]
     ticket_close = str(ticket_tuple[3])[:10]
 
+    markup_inline = ticket_info.get()
     await callback.message.delete()
     await callback.message.answer(text=f'Номер обращения - {ticket_id}\n\n' \
                                     f'Вопрос: {ticket_question}\n' \

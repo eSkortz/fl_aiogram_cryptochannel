@@ -6,7 +6,7 @@ from utils import database_utils
 
 def get(user_id: int) -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    user_tickets = database_utils.get_five_tickets_by_user_id(user_id=user_id)
+    user_tickets = database_utils.Get.get_five_tickets_by_user_id(user_id=user_id)
     # print(user_tickets)
     for i in range(len(user_tickets)):
         ticket_id = user_tickets[i][1]

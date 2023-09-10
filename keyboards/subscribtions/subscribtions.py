@@ -7,16 +7,16 @@ from utils import database_utils
 def get() -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     
-    days_trial = database_utils.get_subscribtion_days_by_title(title='TRIAL')
+    days_trial = database_utils.Get.get_subscribtion_days_by_title(title='TRIAL')
     
-    days_light = database_utils.get_subscribtion_days_by_title(title='LIGHT')
-    price_light = database_utils.get_subscribtion_price_by_title(title='LIGHT')
+    days_light = database_utils.Get.get_subscribtion_days_by_title(title='LIGHT')
+    price_light = database_utils.Get.get_subscribtion_price_by_title(title='LIGHT')
     
-    days_standard = database_utils.get_subscribtion_days_by_title(title='STANDARD')
-    price_standard = database_utils.get_subscribtion_price_by_title(title='STANDARD')
+    days_standard = database_utils.Get.get_subscribtion_days_by_title(title='STANDARD')
+    price_standard = database_utils.Get.get_subscribtion_price_by_title(title='STANDARD')
     
-    days_premium = database_utils.get_subscribtion_days_by_title(title='PREMIUM')
-    price_premium = database_utils.get_subscribtion_price_by_title(title='PREMIUM')
+    days_premium = database_utils.Get.get_subscribtion_days_by_title(title='PREMIUM')
+    price_premium = database_utils.Get.get_subscribtion_price_by_title(title='PREMIUM')
     
     builder.row(types.InlineKeyboardButton(
         text=f'📙 Bitsnake Trial ({days_trial} days) - Free', 

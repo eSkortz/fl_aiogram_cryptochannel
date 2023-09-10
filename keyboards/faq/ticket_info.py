@@ -2,8 +2,6 @@ from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types
 
-from utils import database_utils
-
 def get() -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(types.InlineKeyboardButton(
