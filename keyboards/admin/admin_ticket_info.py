@@ -1,3 +1,5 @@
+"""разметка под информацию по тикету в админ-разделе
+"""
 from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types

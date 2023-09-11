@@ -1,39 +1,67 @@
-from aiogram import Router, F
+from aiogram import Bot, Router, F
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram import Bot
 
 import datetime
 from typing import Coroutine
 
+# * импортируем конфиг бота
 from config.config_reader import bot_config
+# * импортируем ручки для бд
 from utils import database_utils, tronscan_utils
-
+# * импортируем разметку
 from keyboards.wallet import payment_keyboard
 from keyboards.main import only_to_main
 
+# * объявляем бота и роутер
 bot = Bot(token=bot_config.TOKEN.get_secret_value())
-
 router = Router()
 
 
 class Payment(StatesGroup):
+    """класс для хранения стейтов
+    """
     waiting_hash = State()    
     waiting_processing = State()
 
 async def payment_success(message: Message) -> Coroutine:
+    """функция для отправки сообщения после успешного пополнения
+
+    Args:
+        message (Message): сообщение пользователя
+    Returns:
+        Coroutine: ан выходе несколько корутин
+    """
     markup_inline = only_to_main.get()
     await message.delete()
     await message.answer('✅ Ваш баланс пополнен', reply_markup=markup_inline)
 
+
 async def payment_failure(message: Message) -> Coroutine:
+    """функция для отправки сообщения при несупешном пополнении
+
+    Args:
+        message (Message): сообщение пользователя
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     markup_inline = only_to_main.get()
     await message.delete()
     await message.answer('❌ Что-то пошло не так', reply_markup=markup_inline)
     
 
 async def payment_processing(message: Message, hash: str) -> Coroutine:
+    """фукнция для проверки и обработки платежа (цикличная, выход только после успеха)
+
+    Args:
+        message (Message): сообщение пользователя
+        hash (str): хэш транзакции
+
+    Returns:
+        Coroutine: на выходе несколкьо корутин
+    """
     result, amount = tronscan_utils.check_transaction_by_hash(hash)
     if result:
         database_utils.Update.update_transaction_by_hash(hash=hash, amount=amount, date=datetime.datetime.now())
@@ -50,6 +78,14 @@ async def payment_processing(message: Message, hash: str) -> Coroutine:
 
 @router.callback_query(F.data.startswith('payment_processing'))
 async def callback_payment_processing(callback: CallbackQuery) -> Coroutine:
+    """отработка колбэка под обработку платежа
+
+    Args:
+        callback (CallbackQuery): колбэк пользователя
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     hash = callback.data.split('|')[1]
     result, amount = tronscan_utils.check_transaction_by_hash(hash)
     if result:
@@ -67,6 +103,15 @@ async def callback_payment_processing(callback: CallbackQuery) -> Coroutine:
 
 @router.callback_query(F.data == 'payment')
 async def payment(callback: CallbackQuery, state: FSMContext) -> Coroutine:
+    """отработка колбэка по кнопку пополнить баланс
+
+    Args:
+        callback (CallbackQuery): колбэк с сообщения
+        state (FSMContext): наследуем fsm
+        
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     await callback.message.delete()
     text = 'Переведите сумму по этому кошельку в сети TRC20:\n\n'\
         f'{bot_config.USDT_WALLET}\n\n'\
@@ -85,6 +130,15 @@ async def payment(callback: CallbackQuery, state: FSMContext) -> Coroutine:
 
 @router.message(Payment.waiting_hash)
 async def payment_wait(message: Message, state: FSMContext) -> Coroutine:
+    """отработка состояние на ожидания ввода хэша
+
+    Args:
+        message (Message): сообщение пользователя
+        state (FSMContext): наследуем fsm
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     hash = message.text
     await state.update_data(hash = hash)
     is_exist_transaction = database_utils.Check.check_transactions_by_hash(hash=hash)

@@ -4,11 +4,13 @@ from sqlalchemy.orm import sessionmaker
 import datetime
 from typing import Optional
 
+# * импортируем конфиг бд
 from config.config_reader import database_config
+# * импортируем модели таблиц
 from utils.create_models import Users, Transactions, Subcriptions, Tickets, Types_Subcribtions
 
+# * объявляем движок и сессию
 engine = create_engine(database_config.DATABASE_URL.get_secret_value())
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -18,6 +20,15 @@ class Check():
     """
 
     def check_user_by_username(username: str) -> bool:
+        """функция для проверки наличия пользователя в бд
+        по юзернейму
+
+        Args:
+            username (str): юзернейм
+
+        Returns:
+            bool: наличие в бд
+        """
         database = SessionLocal()
         query = select(Users).where(Users.username == username)
         result = database.execute(query).fetchone()
@@ -48,6 +59,14 @@ class Check():
 
 
     def check_transactions_by_hash(hash: str) -> bool:
+        """функция для проверки наличия транзакции в бд по хэшу
+
+        Args:
+            hash (str): хеш
+
+        Returns:
+            bool: наличие транзакции
+        """
         database = SessionLocal()
         query = select(Transactions).where(Transactions.transaction_hash == hash)
         transaction = database.execute(query).fetchone()
@@ -58,6 +77,14 @@ class Check():
     
 
     def check_subcription_by_user_id(user_id: int) -> bool:
+        """функция для проверки были ли подписки у пользователя по юзерайди
+
+        Args:
+            user_id (int): id пользователя
+
+        Returns:
+            bool: наличие подписок
+        """
         database = SessionLocal()
         query = select(Subcriptions).where(Subcriptions.user_id == user_id)
         subscriptions = database.execute(query).fetchall()
@@ -68,6 +95,14 @@ class Check():
 
 
     def check_user_for_trial_subscribtion_by_user_id(user_id: int) -> bool:
+        """проверка была ли у пользователя подписка триал
+
+        Args:
+            user_id (int): id пользователя
+
+        Returns:
+            bool: наличие триала
+        """
         database = SessionLocal()
         query = select(Subcriptions).where((Subcriptions.user_id == user_id) & (Subcriptions.sub_type == 'TRIAL'))
         result = database.execute(query).fetchone()
@@ -78,6 +113,14 @@ class Check():
 
     
     def check_user_have_active_subcribtion(user_id: int) -> bool:
+        """функция для проверки наличия активной подписки
+
+        Args:
+            user_id (int): id пользователя
+
+        Returns:
+            bool: наличие подписки
+        """
         database = SessionLocal()
         query = select(Subcriptions.date_over) \
                 .where(Subcriptions.user_id == user_id) \
@@ -92,6 +135,15 @@ class Check():
 
     
     def check_user_have_enough_money(user_id: int, amount: float) -> bool:
+        """функция для проверки достаточно ли у пользователя денег на аккаунте
+
+        Args:
+            user_id (int): id пользователя
+            amount (float): сумма для проверки
+
+        Returns:
+            bool: наличие суммы на аккаунте
+        """
         database = SessionLocal()
         query = select(Users.balance).where(Users.telegram_id == user_id)
         result = database.execute(query).fetchone()[0]
@@ -107,6 +159,14 @@ class Get():
     """
 
     def get_subscribtion_days_by_title(title: str) -> int:
+        """функция для получения количества дней в подписке по ее названию
+
+        Args:
+            title (str): название подписки
+
+        Returns:
+            int: кол-во дней
+        """
         database = SessionLocal()
         query = select(Types_Subcribtions.time).where(Types_Subcribtions.title == title)
         result = database.execute(query).fetchone()[0]
@@ -115,6 +175,14 @@ class Get():
     
     
     def get_subscribtion_price_by_title(title: str) -> int:
+        """функция для получения стоимости подписки по ее названию
+
+        Args:
+            title (str): название подписки
+
+        Returns:
+            int: стоимость подписки
+        """
         database = SessionLocal()
         query = select(Types_Subcribtions.price).where(Types_Subcribtions.title == title)
         result = database.execute(query).fetchone()[0]
@@ -123,6 +191,14 @@ class Get():
     
     
     def get_balance_by_telegram_id(telegram_id: int) -> float:
+        """функция для получения баланса пользователя по id
+
+        Args:
+            telegram_id (int): id пользователя
+
+        Returns:
+            float: баланс пользователя
+        """
         database = SessionLocal()
         query = select(Users.balance).where(Users.telegram_id == telegram_id)
         result = database.execute(query).fetchone()[0]
@@ -131,6 +207,14 @@ class Get():
     
     
     def get_last_subscribtion_dateover_by_user_id(user_id: int) -> datetime:
+        """функция для получения даты окончания последней подписки пользователя
+
+        Args:
+            user_id (int): id пользователя
+
+        Returns:
+            datetime: дата окончания
+        """
         database = SessionLocal()
         query = select(Subcriptions.date_over) \
                 .where(Subcriptions.user_id == user_id) \
@@ -144,6 +228,14 @@ class Get():
 
     
     def get_last_subscribtion_id_by_user_id(user_id: int) -> int:
+        """функция для получения id последней подписки пользователя по его id
+
+        Args:
+            user_id (int): id пользователя
+
+        Returns:
+            int: id подписки
+        """
         database = SessionLocal()
         query = select(Subcriptions.id) \
                 .where(Subcriptions.user_id == user_id) \
@@ -157,6 +249,14 @@ class Get():
     
     
     def get_five_tickets_by_user_id(user_id: int) -> tuple:
+        """получение последних 5 тикетов пользователя
+
+        Args:
+            user_id (int): id пользователя
+
+        Returns:
+            tuple: последние 5 тикетов
+        """
         database = SessionLocal()
         query = select(Tickets.question, Tickets.id)\
                 .where(Tickets.user_id == user_id)\
@@ -167,6 +267,11 @@ class Get():
     
     
     def get_all_empty_tickets() -> tuple:
+        """получение списка всех неотвеченных тикетов
+
+        Returns:
+            tuple: тикеты
+        """
         database = SessionLocal()
         query = select(Tickets.question, Tickets.id)\
                 .where(Tickets.answer == None)\
@@ -177,6 +282,11 @@ class Get():
     
     
     def get_all_users_telegramid() -> tuple:
+        """получение списка всех id пользователей
+
+        Returns:
+            tuple: _description_
+        """
         database = SessionLocal()
         query = select(Users.telegram_id)
         result = database.execute(query).fetchall()
@@ -185,6 +295,14 @@ class Get():
     
     
     def get_ticket_by_id(ticket_id: int) -> tuple:
+        """получение тикета по его id
+
+        Args:
+            ticket_id (int): id тикета
+
+        Returns:
+            tuple: тикет
+        """
         database = SessionLocal()
         query = select(Tickets.question, Tickets.date_open, 
                     Tickets.answer, Tickets.date_close)\
@@ -195,6 +313,14 @@ class Get():
     
     
     def get_all_user_info_by_username(username: str) -> Optional[dict or int]:
+        """получение информации по пользователю по его никнейму
+
+        Args:
+            username (str): никнейм пользователя
+
+        Returns:
+            Optional[dict or int]: 0 или информация о пользователе
+        """
         database = SessionLocal()
         query = select(Users.telegram_id, Users.balance, Users.registration_date)\
                 .where(Users.username == username).limit(1)
@@ -222,6 +348,12 @@ class Create():
     """
 
     def create_new_user(telegram_id: int, username: str) -> None:
+        """создание нового пользователя в бд
+
+        Args:
+            telegram_id (int): id пользователя
+            username (str): никнейм
+        """
         database = SessionLocal()
         new_user = Users(telegram_id=telegram_id, username=username)
         database.add(new_user)
@@ -230,6 +362,15 @@ class Create():
 
 
     def create_new_transaction(hash: str, from_user_id: int, amount: float = None, status: bool = None, date = None) -> None:
+        """создание новой транзакции в базе данных
+
+        Args:
+            hash (str): хэш транзакции
+            from_user_id (int): id пользователя
+            amount (float, optional): сумма транзакции (при наличии)
+            status (bool, optional): статус транзакции (при наличии)
+            date (_type_, optional): дата закрытия (при наличии)
+        """
         database = SessionLocal()
         new_transaction = Transactions(transaction_hash = hash,
                                     transaction_amount = amount,
@@ -244,6 +385,13 @@ class Create():
 
 
     def create_new_subscribtion(user_id: int, user_name: str, sub_type: str):
+        """создание новой подписки в бд
+
+        Args:
+            user_id (int): id пользователя
+            user_name (str): никнейм пользователя
+            sub_type (str): тип подписки
+        """
         database = SessionLocal()
         days_to_add = Get.get_subscribtion_days_by_title(title=sub_type)
         delta = datetime.timedelta(days=days_to_add)
@@ -255,6 +403,13 @@ class Create():
     
 
     def create_new_ticket(user_id: int, username: str, question: str) -> None:
+        """создание нового тикета в бд
+
+        Args:
+            user_id (int): id пользователя
+            username (str): никнейм
+            question (str): содержание тикета
+        """
         database = SessionLocal()
         new_ticket = Tickets(user_id=user_id, user_name=username, question=question)
         database.add(new_ticket)
@@ -263,6 +418,13 @@ class Create():
         
     
     def create_service_subscribe(username: str, days: int) -> None:
+        """создание служебной подписки или добавление дней
+        к текущей подписки (при ее наличии)
+
+        Args:
+            username (str): никнейм пользователя
+            days (int): количество дней
+        """
         database = SessionLocal()
         query = select(Users.telegram_id).where(Users.username == username).limit(1)
         user_id = database.execute(query).fetchone()[0]
@@ -284,6 +446,13 @@ class Update():
     """
 
     def update_transaction_by_hash(hash: str, amount: float, date) -> None:
+        """обновление транзакции по хэшу
+
+        Args:
+            hash (str): хэш транзакции
+            amount (float): сумма для изменения
+            date (_type_): дата закрытия
+        """
         database = SessionLocal()
         query = update(Transactions).where(Transactions.transaction_hash == hash).values(transaction_amount=amount, status=True, date_close=date)
         database.execute(query)
@@ -292,11 +461,16 @@ class Update():
     
     
     def update_user_balance_by_user_id(user_id: int, amount: float) -> None:
+        """обновление баланса пользователя
+
+        Args:
+            user_id (int): id пользователя
+            amount (float): сумма для обновления
+        """
         database = SessionLocal()
         query = select(Users.balance).where(Users.telegram_id == user_id)
         result = database.execute(query).fetchone()[0]
         new_balance = result + amount
-        # print(new_balance)
         query = update(Users).where(Users.telegram_id == user_id).values(balance=new_balance)
         database.execute(query)
         database.commit()
@@ -304,6 +478,12 @@ class Update():
         
         
     def update_subscription_for_ndays(days: int, sub_id) -> None:
+        """прибавление дней к подписке по ее id в бд
+
+        Args:
+            days (int): кол-во дней
+            sub_id (_type_): id подписки
+        """
         days_to_add = datetime.timedelta(days=days)
         database = SessionLocal()
         query = select(Subcriptions.date_over).where(Subcriptions.id == sub_id).limit(1)
@@ -316,6 +496,12 @@ class Update():
         
     
     def update_answer_for_ticket_by_id(ticket_id: int, answer: str) -> None:
+        """обновление ответа на тикет по его id в бд
+
+        Args:
+            ticket_id (int): id тикета
+            answer (str): ответ на тикет
+        """
         database = SessionLocal()
         date = datetime.datetime.now()
         query = update(Tickets).where(Tickets.id == ticket_id).values(answer=answer, date_close=date)

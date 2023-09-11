@@ -3,12 +3,22 @@ from typing import Coroutine
 import datetime
 import time
 
+# * импортируем ручки для бд
 from utils import database_utils
+# * импортируем конфиг бота
 from config.config_reader import bot_config
 
+# * объявляем бота
 bot = Bot(token=bot_config.TOKEN.get_secret_value())
 
+
 async def auto_kicking_user() -> Coroutine:
+    """функция для автоматического кика пользователей из чата.
+    Отрабатывает раз в час.
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     while True:
         time.sleep(3600)
         users = database_utils.Get.get_all_users_telegramid()
@@ -26,6 +36,12 @@ async def auto_kicking_user() -> Coroutine:
         
 
 async def auto_notify_user() -> Coroutine:
+    """функция для автоматического увдомления пользователей, если
+    до конца их подписки осталось меньше двух дней. Отрабатывает раз в сутки.
+
+    Returns:
+        Coroutine: на выходе несколько корутин
+    """
     while True:
         time.sleep(86400)
         users = database_utils.Get.get_all_users_telegramid()

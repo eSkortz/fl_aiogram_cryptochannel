@@ -70,11 +70,13 @@ async def fsm_addbalance_processing_first(message: Message, state: FSMContext) -
     await bot.delete_message(chat_id=message.chat.id, message_id=state_data['id'])
     # * Проверяем существование пользователя, в случае успеха переходим к следующему стейту
     if is_user_with_username_exist:
+        # * отправляем сообщение, сохраняем его айди в стейт и ставим стейт ожидания суммы
         sent_message = await message.answer('✏️ Отправьте сумму на которую хотите пополнить баланс пользователя')
         await state.set_state(AddBalance.waiting_for_money)
         await state.update_data(id = sent_message.message_id)
         await state.update_data(username = message.text)
     else:
+        # * в случае неудачи отправляем сообщение об ошибке
         markup_inline = only_to_admin.get()
         await message.answer(text='❌ Проверьте правильность ввода', reply_markup=markup_inline)
         

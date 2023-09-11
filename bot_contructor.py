@@ -1,4 +1,4 @@
-# isn't using in this project
+# * не используется в этом проекте, но очень удобный конструктор
 
 from functools import singledispatchmethod
 from typing import List

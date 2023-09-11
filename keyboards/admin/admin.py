@@ -1,3 +1,5 @@
+"""разметка под раздел админ-панели
+"""
 from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types

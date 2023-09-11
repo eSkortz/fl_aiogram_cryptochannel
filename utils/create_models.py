@@ -1,16 +1,19 @@
+# * Импортируем все необходимые функции sqlalchemy
 from sqlalchemy import create_engine, Column, Integer, String, BigInteger, DateTime, Float, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
+# * импортируем конфиг бота и базы данных
 from config.config_reader import database_config
 from config.config_reader import bot_config
 
 import datetime
 
-engine = create_engine(database_config.DATABASE_URL.get_secret_value())
 
+engine = create_engine(database_config.DATABASE_URL.get_secret_value())
 Base = declarative_base()
 
 
+# * класс под таблицу users
 class Users(Base):
     __tablename__ = 'users'
     
@@ -20,7 +23,7 @@ class Users(Base):
     balance = Column(Float, default=0.0)
     registration_date = Column(DateTime, unique=False, default=datetime.datetime.now(), nullable=False)
     
-    
+# * класс под таблицу transactions
 class Transactions(Base):
     __tablename__ = 'transactions'
     
@@ -33,7 +36,7 @@ class Transactions(Base):
     date_close = Column(DateTime, nullable=True)
     status = Column(Boolean, nullable=True, default=False)
     
-    
+# * класс под таблицу subscribtions 
 class Subcriptions(Base):
     __tablename__ = 'subscriptions'
     
@@ -44,7 +47,7 @@ class Subcriptions(Base):
     date_over = Column(DateTime, nullable=False)
     sub_type = Column(String, nullable=False)
     
-
+# * класс под таблицу tickets
 class Tickets(Base):
     __tablename__ = 'tickets'
     
@@ -56,7 +59,7 @@ class Tickets(Base):
     date_open = Column(DateTime, nullable=False, default=datetime.datetime.now())
     date_close = Column(DateTime, nullable=True)
     
-
+# * класс под таблицу types_subscribtions
 class Types_Subcribtions(Base):
     __tablename__ = 'types_subscribtions'
     
@@ -66,5 +69,6 @@ class Types_Subcribtions(Base):
     time = Column(Integer, nullable=False)
     
 
-
-Base.metadata.create_all(bind=engine)
+# * создаем все таблицы если они еще не существуют
+def creating_models() -> None:
+    Base.metadata.create_all(bind=engine)
