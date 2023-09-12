@@ -60,8 +60,8 @@ async def main() -> Coroutine:
     await asyncio.create_task(dp.start_polling(bot))
     
     # * запускаем функции уведомлений и автокика
-    # await asyncio.create_task(auto_notify_user())
-    # await asyncio.create_task(auto_kicking_user())
+    await asyncio.create_task(auto_notify_user())
+    await asyncio.create_task(auto_kicking_user())
 
 
 if __name__ == "__main__":
