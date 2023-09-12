@@ -2,6 +2,7 @@ from aiogram import Bot
 from typing import Coroutine
 import datetime
 import time
+import asyncio
 
 # * импортируем ручки для бд
 from utils import database_utils
@@ -20,9 +21,9 @@ async def auto_kicking_user() -> Coroutine:
         Coroutine: на выходе несколько корутин
     """
     while True:
-        time.sleep(3600)
         users = database_utils.Get.get_all_users_telegramid()
-        for user_id in users:
+        for user in users:
+            user_id = user[0]
             dateover = database_utils.Get.get_last_subscribtion_dateover_by_user_id(user_id=user_id)
             try:
                 await bot.get_chat_member(chat_id=-1001975523437, user_id=user_id)
@@ -33,6 +34,7 @@ async def auto_kicking_user() -> Coroutine:
             if datetime.datetime.now() > dateover and is_in_chat:
                 await bot.ban_chat_member(chat_id=-1001975523437, user_id=user_id)
                 await bot.unban_chat_member(chat_id=-1001975523437, user_id=user_id)
+        await asyncio.sleep(3600)
         
 
 async def auto_notify_user() -> Coroutine:
@@ -43,12 +45,13 @@ async def auto_notify_user() -> Coroutine:
         Coroutine: на выходе несколько корутин
     """
     while True:
-        time.sleep(86400)
         users = database_utils.Get.get_all_users_telegramid()
-        for user_id in users:
+        for user in users:
+            user_id = user[0]
             dateover = database_utils.Get.get_last_subscribtion_dateover_by_user_id(user_id=user_id)
             if datetime.datetime.now() < dateover:
                 time_diff = dateover - datetime.datetime.now
                 if time_diff.days < 2:
                     text = '🧨 Ваша подписка скоро закончится, не забудьте продлить её!'
                     await bot.send_message(chat_id=user_id, text=text) 
+        await asyncio.sleep(86400)

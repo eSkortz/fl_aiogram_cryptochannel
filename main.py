@@ -56,14 +56,16 @@ async def main() -> Coroutine:
     # * Пропускаем все накопившиеся соообщения
     await bot.delete_webhook(drop_pending_updates=True)
     
+    task1 = asyncio.create_task(auto_kicking_user())
+    task2 = asyncio.create_task(auto_notify_user())
+
     # * Запускаем поллинг бота
-    await asyncio.create_task(dp.start_polling(bot))
+    task3 = asyncio.create_task(dp.start_polling(bot))
+
+    await task1, task2, task3
     
-    # * запускаем функции уведомлений и автокика
-    await asyncio.create_task(auto_notify_user())
-    await asyncio.create_task(auto_kicking_user())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())
+    
     
