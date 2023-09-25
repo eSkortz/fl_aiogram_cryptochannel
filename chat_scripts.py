@@ -50,7 +50,7 @@ async def auto_notify_user() -> Coroutine:
             user_id = user[0]
             dateover = database_utils.Get.get_last_subscribtion_dateover_by_user_id(user_id=user_id)
             if datetime.datetime.now() < dateover:
-                time_diff = dateover - datetime.datetime.now
+                time_diff = dateover - datetime.datetime.now()
                 if time_diff.days < 2:
                     text = '🧨 Ваша подписка скоро закончится, не забудьте продлить её!'
                     await bot.send_message(chat_id=user_id, text=text) 
